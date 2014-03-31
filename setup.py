@@ -10,7 +10,7 @@ setup(
     ],
     install_requires = [
         "Twisted>=13.2",
-        "pyOpenSSL>=0.10",
+        "pyOpenSSL>=0.14",
     ],
     version = "0.1",
 )
