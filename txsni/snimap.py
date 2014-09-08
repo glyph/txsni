@@ -9,7 +9,7 @@ class SNIMap(ContextFactory, object):
     def __init__(self, mapping):
         self.mapping = mapping
         try:
-            self.context = self.mapping['DEFAULT']
+            self.context = self.mapping['DEFAULT'].getContext()
         except KeyError:
             self.context = Context(TLSv1_METHOD)
         self.context.set_tlsext_servername_callback(
