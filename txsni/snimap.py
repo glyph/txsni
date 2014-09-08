@@ -8,7 +8,10 @@ from txsni.only_noticed_pypi_pem_after_i_wrote_this import (
 class SNIMap(ContextFactory, object):
     def __init__(self, mapping):
         self.mapping = mapping
-        self.context = Context(TLSv1_METHOD)
+        try:
+            self.context = self.mapping['DEFAULT']
+        except KeyError:
+            self.context = Context(TLSv1_METHOD)
         self.context.set_tlsext_servername_callback(
             self.selectContext
         )
