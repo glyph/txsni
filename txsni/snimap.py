@@ -1,6 +1,5 @@
+from twisted.internet.ssl import CertificateOptions, ContextFactory
 
-from OpenSSL.SSL import Context, TLSv1_METHOD
-from twisted.internet.ssl import ContextFactory
 from txsni.only_noticed_pypi_pem_after_i_wrote_this import (
     certificateOptionsFromPileOfPEM
 )
@@ -11,7 +10,7 @@ class SNIMap(ContextFactory, object):
         try:
             self.context = self.mapping['DEFAULT'].getContext()
         except KeyError:
-            self.context = Context(TLSv1_METHOD)
+            self.context = CertificateOptions().getContext()
         self.context.set_tlsext_servername_callback(
             self.selectContext
         )
