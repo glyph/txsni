@@ -32,6 +32,8 @@ class HostDirectoryMap(object):
 
 
     def __getitem__(self, hostname):
+        if hostname is None:
+            hostname = "DEFAULT"
         filePath = self.directoryPath.child(hostname + ".pem")
         if filePath.isfile():
             return certificateOptionsFromPileOfPEM(filePath.getContent())
