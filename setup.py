@@ -10,13 +10,13 @@ with open(os.path.join(base_dir, "README.rst")) as f:
 
 setup(
     name="TxSNI",
-    description= "easy-to-use SNI endpoint for twisted",
+    description="easy-to-use SNI endpoint for twisted",
     packages=[
         "txsni",
         "twisted.plugins",
     ],
     install_requires=[
-        "Twisted>=13.2",
+        "Twisted[tls]>=13.2",
         "pyOpenSSL>=0.14",
     ],
     version="0.1.6",

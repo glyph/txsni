@@ -1,6 +1,9 @@
 txsni
 =====
 
+.. image:: https://travis-ci.org/glyph/txsni.svg?branch=master
+    :target: https://travis-ci.org/glyph/txsni
+
 Simple support for running a TLS server with Twisted.
 
 Use it like this:

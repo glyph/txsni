@@ -1,0 +1,5 @@
+.coverage
+.tox/
+*.egg-info/
+*.pyc
+dropin.cache

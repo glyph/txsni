@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = txsni
+
+[paths]
+source =
+    txsni
+    .tox/*/lib/python*/site-packages/txsni
+    .tox/pypy*/site-packages/txsni
