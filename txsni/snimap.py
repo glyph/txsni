@@ -55,6 +55,17 @@ class HostDirectoryMap(MutableMapping):
 
 
     def _certPath(self, hostname):
+        """
+        Get the path for the certificate for a particular hostname.
+
+        The special case of C{None} is mapped to the hostname C{'DEFAULT'}.
+
+        @type hostname: L{str}
+        @param hostname: The hostname.
+
+        @rtype: L{twisted.python.filepath.FilePath}
+        @return: A FilePath to the file with certificate data.
+        """
         if hostname is None:
             hostname = 'DEFAULT'
         return self.directoryPath.child(hostname + '.pem')
