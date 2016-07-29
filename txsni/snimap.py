@@ -59,12 +59,15 @@ class _ConnectionProxy(object):
         object is returned.
         """
         ctx = self._obj.get_context()
-        return _ContextProxy(ctx, self.factory)
+        return _ContextProxy(ctx, self._factory)
 
     def __getattr__(self, attr):
         return getattr(self._obj, attr)
 
     def __setattr__(self, attr, val):
+        if attr in ('_obj', '_factory'):
+            self.__dict__[attr] = val
+
         return setattr(self._obj, attr, val)
 
     def __delattr__(self, attr):
@@ -101,6 +104,9 @@ class _ContextProxy(object):
         return getattr(self._obj, attr)
 
     def __setattr__(self, attr, val):
+        if attr in ('_obj', '_factory'):
+            self.__dict__[attr] = val
+
         return setattr(self._obj, attr, val)
 
     def __delattr__(self, attr):
