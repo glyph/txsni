@@ -114,7 +114,7 @@ class _ContextProxy(object):
 
 
 @implementer(IOpenSSLServerConnectionCreator)
-class SNIMap(ContextFactory, object):
+class SNIMap(object):
     def __init__(self, mapping):
         self.mapping = mapping
         self._negotiationDataForContext = collections.defaultdict(
@@ -127,9 +127,6 @@ class SNIMap(ContextFactory, object):
         self.context.set_tlsext_servername_callback(
             self.selectContext
         )
-
-    def getContext(self):
-        return self.context
 
     def selectContext(self, connection):
         oldContext = connection.get_context()
