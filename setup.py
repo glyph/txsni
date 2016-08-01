@@ -16,7 +16,7 @@ setup(
         "twisted.plugins",
     ],
     install_requires=[
-        "Twisted[tls]>=13.2",
+        "Twisted[tls]>=14.0",
         "pyOpenSSL>=0.14",
     ],
     version="0.1.6",

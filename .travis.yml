@@ -12,10 +12,10 @@ env:
   - TOXENV=py27-twlatest
   - TOXENV=pypy-twlatest OPENSSL_VERSION=1.0.2h
   - TOXENV=pypy-twlatest
-  - TOXENV=py27-tw132 OPENSSL_VERSION=1.0.2h
-  - TOXENV=py27-tw132
-  - TOXENV=pypy-tw132 OPENSSL_VERSION=1.0.2h
-  - TOXENV=pypy-tw132
+  - TOXENV=py27-tw14 OPENSSL_VERSION=1.0.2h
+  - TOXENV=py27-tw14
+  - TOXENV=pypy-tw14 OPENSSL_VERSION=1.0.2h
+  - TOXENV=pypy-tw14
   - TOXENV=py27-twtrunk OPENSSL_VERSION=1.0.2h
   - TOXENV=py27-twtrunk
   - TOXENV=pypy-twtrunk OPENSSL_VERSION=1.0.2h
