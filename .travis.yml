@@ -22,10 +22,10 @@ env:
   - TOXENV=pypy-twtrunk
 
 install:
-  - "./travis/install.sh"
+  - "./.travis/install.sh"
 
 script:
-  - "./travis/run.sh"
+  - "./.travis/run.sh"
 
 after_success:
   # Codecov needs combined coverage, and having the raw report in the test
