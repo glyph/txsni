@@ -3,6 +3,12 @@
 set -e
 set -x
 
+if [ "${TOXENV::5}" == "pypy-" ]; then
+    PYENV_ROOT="$HOME/.pyenv"
+    PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+fi
+
 if [[ -v OPENSSL_VERSION ]]; then
     OPENSSL_DIR="${HOME}/ossl"
 
