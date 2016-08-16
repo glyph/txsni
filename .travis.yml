@@ -8,30 +8,24 @@ python:
   - 2.7
 
 env:
+  - TOXENV=py27-twlatest OPENSSL_VERSION=1.0.2h
   - TOXENV=py27-twlatest
+  - TOXENV=pypy-twlatest OPENSSL_VERSION=1.0.2h
   - TOXENV=pypy-twlatest
+  - TOXENV=py27-tw132 OPENSSL_VERSION=1.0.2h
   - TOXENV=py27-tw132
+  - TOXENV=pypy-tw132 OPENSSL_VERSION=1.0.2h
   - TOXENV=pypy-tw132
+  - TOXENV=py27-twtrunk OPENSSL_VERSION=1.0.2h
   - TOXENV=py27-twtrunk
+  - TOXENV=pypy-twtrunk OPENSSL_VERSION=1.0.2h
   - TOXENV=pypy-twtrunk
 
 install:
-  # Upgrade packaging tools separately, so that other installations are
-  # performed with the upgraded tools.
-  - pip install -U pip setuptools wheel
-  - pip install tox codecov
-  - |
-    if [ "${TOXENV::5}" == "pypy-" ]; then
-      git clone --depth 1 https://github.com/yyuu/pyenv.git ~/.pyenv
-      PYENV_ROOT="$HOME/.pyenv"
-      PATH="$PYENV_ROOT/bin:$PATH"
-      eval "$(pyenv init -)"
-      pyenv install pypy-4.0.1
-      pyenv global pypy-4.0.1
-    fi
+  - "./travis/install.sh"
 
 script:
-  - tox
+  - "./travis/run.sh"
 
 after_success:
   # Codecov needs combined coverage, and having the raw report in the test
