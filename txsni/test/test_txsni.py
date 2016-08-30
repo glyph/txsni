@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import functools
 import os
 
 from txsni.snimap import SNIMap, HostDirectoryMap
@@ -18,16 +17,11 @@ from twisted.trial import unittest
 from zope.interface import implementer
 
 from .certs.cert_builder import (
-    ROOT_CERT_PATH, DEFAULT_CERT_PATH, HTTP2BIN_CERT_PATH
+    ROOT_CERT_PATH, HTTP2BIN_CERT_PATH, _build_certs, CERT_DIR
 )
 
-
-HERE = os.path.dirname(__file__)
-CERT_DIR = os.path.join(HERE, 'certs')
-ROOT_CERT_PATH = os.path.join(CERT_DIR, ROOT_CERT_PATH)
-DEFAULT_CERT_PATH = os.path.join(CERT_DIR, DEFAULT_CERT_PATH)
-HTTP2BIN_CERT_PATH = os.path.join(CERT_DIR, HTTP2BIN_CERT_PATH)
-
+# We need some temporary certs.
+_build_certs()
 
 with open(ROOT_CERT_PATH, 'rb') as f:
     PEM_ROOT = Certificate.loadPEM(f.read())

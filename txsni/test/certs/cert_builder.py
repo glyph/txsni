@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -8,6 +8,7 @@ from cryptography.x509.oid import NameOID
 import datetime
 import uuid
 import os
+import tempfile
 
 
 ONE_DAY = datetime.timedelta(1, 0, 0)
@@ -16,12 +17,13 @@ TENISH_YEARS = datetime.timedelta(10 * 365, 0, 0)
 
 
 # Various exportable constants that the tests can (and should!) use.
-ROOT_CERT_PATH = 'root_cert.pem'
-ROOT_KEY_PATH = 'root_cert.key'
-DEFAULT_CERT_PATH = 'DEFAULT.pem'
-DEFAULT_KEY_PATH = 'DEFAULT.key'
-HTTP2BIN_CERT_PATH = 'http2bin.org.pem'
-HTTP2BIN_KEY_PATH = 'http2bin.org.key'
+CERT_DIR = tempfile.mkdtemp()
+ROOT_CERT_PATH = os.path.join(CERT_DIR, 'root_cert.pem')
+ROOT_KEY_PATH = os.path.join(CERT_DIR, 'root_cert.key')
+DEFAULT_CERT_PATH = os.path.join(CERT_DIR, 'DEFAULT.pem')
+DEFAULT_KEY_PATH = os.path.join(CERT_DIR, 'DEFAULT.key')
+HTTP2BIN_CERT_PATH = os.path.join(CERT_DIR, 'http2bin.org.pem')
+HTTP2BIN_KEY_PATH = os.path.join(CERT_DIR, 'http2bin.org.key')
 
 
 # A list of tuples that controls what certs get built and signed by the root.
@@ -106,7 +108,7 @@ def _build_single_leaf(hostname, certfile, ca_cert, ca_key):
     """
     Builds a single leaf certificate, signed by the CA's private key.
     """
-    if os.path.isfile(certfile) and os.path.isfile(keyfile):
+    if os.path.isfile(certfile):
         print("%s already exists, not regenerating" % hostname)
         return
 
