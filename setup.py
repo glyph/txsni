@@ -13,6 +13,8 @@ setup(
     description="easy-to-use SNI endpoint for twisted",
     packages=[
         "txsni",
+        "txsni.test",
+        "txsni.test.certs",
         "twisted.plugins",
     ],
     install_requires=[
