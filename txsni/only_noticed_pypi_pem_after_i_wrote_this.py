@@ -12,6 +12,8 @@ def objectsFromPEM(pemdata):
     """
     certificates = []
     keys = []
+    garbage = [""]
+    blobs = garbage
     for line in pemdata.split("\n"):
         if line.startswith('-----BEGIN'):
             if 'CERTIFICATE' in line:
