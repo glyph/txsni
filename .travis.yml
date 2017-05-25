@@ -7,20 +7,22 @@ branches:
 python:
   - 2.7
 
-env:
-  - TOXENV=py27-twlatest OPENSSL_VERSION=1.0.2h
-  - TOXENV=py27-twlatest
-  - TOXENV=py36-twlatest
-  - TOXENV=pypy-twlatest OPENSSL_VERSION=1.0.2h
-  - TOXENV=pypy-twlatest
-  - TOXENV=py27-tw14 OPENSSL_VERSION=1.0.2h
-  - TOXENV=py27-tw14
-  - TOXENV=pypy-tw14 OPENSSL_VERSION=1.0.2h
-  - TOXENV=pypy-tw14
-  - TOXENV=py27-twtrunk OPENSSL_VERSION=1.0.2h
-  - TOXENV=py27-twtrunk
-  - TOXENV=pypy-twtrunk OPENSSL_VERSION=1.0.2h
-  - TOXENV=pypy-twtrunk
+matrix:
+  include:
+    - env: TOXENV=py27-twlatest OPENSSL_VERSION=1.0.2h
+    - env: TOXENV=py27-twlatest
+    - env: TOXENV=py36-twlatest
+      python: 3.6
+    - env: TOXENV=pypy-twlatest OPENSSL_VERSION=1.0.2h
+    - env: TOXENV=pypy-twlatest
+    - env: TOXENV=py27-tw14 OPENSSL_VERSION=1.0.2h
+    - env: TOXENV=py27-tw14
+    - env: TOXENV=pypy-tw14 OPENSSL_VERSION=1.0.2h
+    - env: TOXENV=pypy-tw14
+    - env: TOXENV=py27-twtrunk OPENSSL_VERSION=1.0.2h
+    - env: TOXENV=py27-twtrunk
+    - env: TOXENV=pypy-twtrunk OPENSSL_VERSION=1.0.2h
+    - env: TOXENV=pypy-twtrunk
 
 install:
   - "./.travis/install.sh"
