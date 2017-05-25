@@ -116,7 +116,7 @@ class WriteBackProtocol(protocol.Protocol):
     connection.
     """
     def connectionMade(self):
-        self.transport.write('PING')
+        self.transport.write(b'PING')
         self.transport.loseConnection()
 
 
