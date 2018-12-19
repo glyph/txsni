@@ -312,10 +312,10 @@ class TestSNIDirectoryParser(unittest.TestCase):
             handshake_deferred.addCallback(maybeRethrow)
             return handshake_deferred
 
-        def reset_certs(_):
+        def reset_http2bin_cert(_):
             FilePath(HTTP2BIN_CERT_PATH).remove()
             _build_certs()
 
         old_cert_handshake = handshake_and_check(None)
-        old_cert_handshake.addCallback(reset_certs)
+        old_cert_handshake.addCallback(reset_http2bin_cert)
         return old_cert_handshake.addCallback(handshake_and_check)

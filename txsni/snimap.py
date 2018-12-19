@@ -5,7 +5,7 @@ from zope.interface import implementer
 from OpenSSL.SSL import Connection
 
 from twisted.internet.interfaces import IOpenSSLServerConnectionCreator
-from twisted.internet.ssl import CertificateOptions, ContextFactory
+from twisted.internet.ssl import CertificateOptions
 
 from txsni.only_noticed_pypi_pem_after_i_wrote_this import (
     certificateOptionsFromPileOfPEM
