@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 
-import os
-
 from txsni.snimap import SNIMap, HostDirectoryMap
 from txsni.tlsendpoint import TLSEndpoint
+from txsni.parser import SNIDirectoryParser
 
 from OpenSSL.crypto import load_certificate, FILETYPE_PEM
 
@@ -17,7 +16,7 @@ from twisted.trial import unittest
 from zope.interface import implementer
 
 from .certs.cert_builder import (
-    ROOT_CERT_PATH, HTTP2BIN_CERT_PATH, _build_certs, CERT_DIR
+    ROOT_CERT_PATH, HTTP2BIN_CERT_PATH, CERT_DIR, _build_certs,
 )
 
 # We need some temporary certs.
@@ -168,24 +167,26 @@ class TestSNIMap(unittest.TestCase):
         self.assertIsNot(conn.get_context(), options.getContext())
         self.assertIsNotNone(conn.get_context())
 
+def assert_cert_is(test_case, protocol_cert, cert_path):
+    """
+    Assert that ``protocol_cert`` is the same certificate as the one at
+    ``cert_path``.
+    """
+    with open(cert_path, 'rb') as f:
+        target_cert = load_certificate(FILETYPE_PEM, f.read())
+
+    test_case.assertEqual(
+        protocol_cert.digest('sha256'),
+        target_cert.digest('sha256')
+    )
+
+
 
 class TestCommunication(unittest.TestCase):
     """
     Tests that use the full Twisted logic to validate that txsni works as
     expected.
     """
-    def assertCertIs(self, protocol_cert, cert_path):
-        """
-        Assert that ``protocol_cert`` is the same certificate as the one at
-        ``cert_path``.
-        """
-        with open(cert_path, 'rb') as f:
-            target_cert = load_certificate(FILETYPE_PEM, f.read())
-
-        self.assertEqual(
-            protocol_cert.digest('sha256'),
-            target_cert.digest('sha256')
-        )
 
     def test_specific_certificate(self):
         """
@@ -206,7 +207,7 @@ class TestCommunication(unittest.TestCase):
 
         def confirm_cert(args):
             cert, proto = args
-            self.assertCertIs(cert, HTTP2BIN_CERT_PATH)
+            assert_cert_is(self, cert, HTTP2BIN_CERT_PATH)
             return d
 
         def close(args):
@@ -255,3 +256,66 @@ class TestNegotiationStillWorks(unittest.TestCase):
         handshake_deferred.addCallback(confirm_cert)
         handshake_deferred.addCallback(close)
         return handshake_deferred
+
+
+class TestSNIDirectoryParser(unittest.TestCase):
+    """
+    Tests the C{txsni} endpoint implementation.
+    """
+
+    def setUp(self):
+        self.directory_parser = SNIDirectoryParser()
+
+    def test_recreated_certificates(self):
+        """
+        L{SNIDirectoryParser} always uses the latest certificate for
+        the requested domain.
+        """
+        endpoint = self.directory_parser.parseStreamServer(
+                reactor, CERT_DIR, 'tcp', port='0', interface='127.0.0.1')
+
+        def handshake_and_check(_):
+            handshake_deferred = defer.Deferred()
+            client_factory = WritingProtocolFactory(handshake_deferred)
+            server_factory = protocol.Factory.forProtocol(WriteBackProtocol)
+
+            initiate_handshake_deferred = handshake(
+                    client_factory=client_factory,
+                    server_factory=server_factory,
+                    hostname=u"http2bin.org",
+                    server_endpoint=endpoint,
+                )
+
+            def confirm_cert(args):
+                cert, proto = args
+                assert_cert_is(self, cert, HTTP2BIN_CERT_PATH)
+
+            def close(args):
+                client, port = args
+                port.stopListening()
+
+            exception = [None]
+
+            def captureException(f):
+                exception[0] = f
+
+            def maybeRethrow(_):
+                if exception[0] is not None:
+                    exception[0].raiseException()
+
+            handshake_deferred.addCallback(confirm_cert)
+            handshake_deferred.addErrback(captureException)
+
+            handshake_deferred.addCallback(lambda _: initiate_handshake_deferred)
+            handshake_deferred.addCallback(close)
+
+            handshake_deferred.addCallback(maybeRethrow)
+            return handshake_deferred
+
+        def reset_certs(_):
+            FilePath(HTTP2BIN_CERT_PATH).remove()
+            _build_certs()
+
+        old_cert_handshake = handshake_and_check(None)
+        old_cert_handshake.addCallback(reset_certs)
+        return old_cert_handshake.addCallback(handshake_and_check)
