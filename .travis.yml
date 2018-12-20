@@ -7,20 +7,20 @@ branches:
 
 matrix:
   include:
-    - env: TOXENV=py27-twlatest OPENSSL_VERSION=1.0.2h
+    - env: TOXENV=py27-twlatest
       python: 2.7
     - env: TOXENV=py27-twlatest
       python: 2.7
     - env: TOXENV=py36-twlatest
       python: 3.6
-    - env: TOXENV=py27-twtrunk OPENSSL_VERSION=1.0.2h
+    - env: TOXENV=py27-twtrunk
       python: 2.7
     - env: TOXENV=py27-twtrunk
       python: 2.7
-    - env: TOXENV=pypy-twtrunk OPENSSL_VERSION=1.0.2h
+    - env: TOXENV=pypy-twtrunk
       python: "pypy"
       dist: trusty
-    - env: TOXENV=pypy-twlatest OPENSSL_VERSION=1.0.2h
+    - env: TOXENV=pypy-twlatest
       python: "pypy"
       dist: trusty
     - env: TOXENV=pypy-twlatest
@@ -30,11 +30,9 @@ matrix:
       python: "pypy"
       dist: trusty
 
-install:
-  - "./.travis/install.sh"
-
 script:
-  - "./.travis/run.sh"
+  - pip install tox codecov
+  - tox
 
 after_success:
   # Codecov needs combined coverage, and having the raw report in the test
