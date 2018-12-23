@@ -230,7 +230,7 @@ class TestPemObjects(unittest.TestCase, object):
         The empty string returns an empty list of certificates.
         """
 
-        objects = objectsFromPEM("")
+        objects = objectsFromPEM(b"")
         self.assertEqual(objects.certificates, [])
         self.assertEqual(objects.keys, [])
 
