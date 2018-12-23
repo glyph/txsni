@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from txsni.snimap import SNIMap, HostDirectoryMap
 from txsni.tlsendpoint import TLSEndpoint
+from txsni.only_noticed_pypi_pem_after_i_wrote_this import objectsFromPEM
 from txsni.parser import SNIDirectoryParser
 
 from OpenSSL.crypto import load_certificate, FILETYPE_PEM
@@ -217,6 +218,21 @@ class TestCommunication(unittest.TestCase):
         handshake_deferred.addCallback(confirm_cert)
         handshake_deferred.addCallback(close)
         return handshake_deferred
+
+
+class TestPemObjects(unittest.TestCase, object):
+    """
+    Tests for L{objectsFromPEM}
+    """
+
+    def test_noObjects(self):
+        """
+        The empty string returns an empty list of certificates.
+        """
+
+        objects = objectsFromPEM(b"")
+        self.assertEqual(objects.certificates, [])
+        self.assertEqual(objects.keys, [])
 
 
 class TestNegotiationStillWorks(unittest.TestCase):
