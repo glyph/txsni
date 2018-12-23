@@ -15,7 +15,7 @@ Use it like this:
    $ cat public-stuff/mydomain.crt.pem >> certificates/mydomain.example.com.pem
    $ cat public-stuff/my-certificate-authority-chain.crt.pem >> \
        certificates/mydomain.example.com.pem
-   $ twistd -n web --port txsni:certificates:tcp:443
+   $ twist web --port txsni:certificates:tcp:443
 
 Enjoy!
 

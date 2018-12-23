@@ -5,7 +5,7 @@ from zope.interface import implementer
 from OpenSSL.SSL import Connection
 
 from twisted.internet.interfaces import IOpenSSLServerConnectionCreator
-from twisted.internet.ssl import CertificateOptions, ContextFactory
+from twisted.internet.ssl import CertificateOptions
 
 from txsni.only_noticed_pypi_pem_after_i_wrote_this import (
     certificateOptionsFromPileOfPEM
@@ -174,7 +174,7 @@ class HostDirectoryMap(object):
     def __getitem__(self, hostname):
         if hostname is None:
             hostname = "DEFAULT"
-        filePath = self.directoryPath.child(hostname + ".pem")
+        filePath = self.directoryPath.child(hostname).siblingExtension(".pem")
         if filePath.isfile():
             return certificateOptionsFromPileOfPEM(filePath.getContent())
         else:

@@ -1,10 +1,13 @@
-from __future__ import print_function, absolute_import
+from __future__ import absolute_import
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
+
+from twisted.logger import Logger
+
 import datetime
 import uuid
 import os
@@ -35,6 +38,8 @@ _CERTS = [
 ]
 
 
+_LOGGER = Logger()
+
 def _build_root_cert():
     """
     Builds a single root certificate that can be used to sign the others. This
@@ -43,7 +48,7 @@ def _build_root_cert():
     build the leaves.
     """
     if os.path.isfile(ROOT_CERT_PATH) and os.path.isfile(ROOT_KEY_PATH):
-        print("Root already exists, not regenerating.")
+        _LOGGER.info("Root already exists, not regenerating.")
         with open(ROOT_CERT_PATH, 'rb') as f:
             certificate = x509.load_pem_x509_certificate(
                 f.read(), default_backend()
@@ -99,7 +104,7 @@ def _build_root_cert():
             certificate.public_bytes(serialization.Encoding.PEM)
         )
 
-    print("Built root certificate.")
+    _LOGGER.info("Built root certificate.")
 
     return certificate, private_key
 
@@ -109,7 +114,8 @@ def _build_single_leaf(hostname, certfile, ca_cert, ca_key):
     Builds a single leaf certificate, signed by the CA's private key.
     """
     if os.path.isfile(certfile):
-        print("%s already exists, not regenerating" % hostname)
+        _LOGGER.info("{hostname} already exists, not regenerating",
+                     hostname=hostname)
         return
 
     private_key = rsa.generate_private_key(
@@ -158,7 +164,7 @@ def _build_single_leaf(hostname, certfile, ca_cert, ca_key):
             certificate.public_bytes(serialization.Encoding.PEM)
         )
 
-    print("Built certificate for %s" % hostname)
+    _LOGGER.info("Built certificate for {hostname}", hostname=hostname)
 
 
 def _build_certs():

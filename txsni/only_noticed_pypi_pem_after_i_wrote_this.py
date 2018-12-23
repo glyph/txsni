@@ -12,17 +12,16 @@ def objectsFromPEM(pemdata):
     """
     certificates = []
     keys = []
-    garbage = [""]
-    blobs = garbage
-    for line in pemdata.split("\n"):
-        if line.startswith('-----BEGIN'):
-            if 'CERTIFICATE' in line:
+    blobs = [b""]
+    for line in pemdata.split(b"\n"):
+        if line.startswith(b'-----BEGIN'):
+            if b'CERTIFICATE' in line:
                 blobs = certificates
             else:
                 blobs = keys
-            blobs.append('')
+            blobs.append(b'')
         blobs[-1] += line
-        blobs[-1] += '\n'
+        blobs[-1] += b'\n'
     keys = [KeyPair.load(key, FILETYPE_PEM) for key in keys]
     certificates = [Certificate.loadPEM(certificate)
                     for certificate in certificates]

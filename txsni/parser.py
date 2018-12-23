@@ -8,7 +8,6 @@ from twisted.internet.endpoints import serverFromString
 from twisted.plugin import IPlugin
 
 from txsni.snimap import SNIMap
-from txsni.maputils import Cache
 from txsni.snimap import HostDirectoryMap
 from twisted.python.filepath import FilePath
 from txsni.tlsendpoint import TLSEndpoint
@@ -23,9 +22,7 @@ class SNIDirectoryParser(object):
             return ':'.join([item.replace(':', '\\:') for item in items])
         sub = colonJoin(list(args) + ['='.join(item) for item in kw.items()])
         subEndpoint = serverFromString(reactor, sub)
-        contextFactory = SNIMap(
-            Cache(HostDirectoryMap(FilePath(expanduser(pemdir))))
-        )
+        contextFactory = SNIMap(HostDirectoryMap(FilePath(expanduser(pemdir))))
         return TLSEndpoint(endpoint=subEndpoint,
                            contextFactory=contextFactory)
 
