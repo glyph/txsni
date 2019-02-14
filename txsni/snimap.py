@@ -106,8 +106,8 @@ class _ContextProxy(object):
     def __setattr__(self, attr, val):
         if attr in ('_obj', '_factory'):
             self.__dict__[attr] = val
-
-        return setattr(self._obj, attr, val)
+        else:
+            return setattr(self._obj, attr, val)
 
     def __delattr__(self, attr):
         return delattr(self._obj, attr)
