@@ -1,11 +1,14 @@
 from __future__ import absolute_import
 
+from functools import partial
+
 from txsni.snimap import SNIMap, HostDirectoryMap
 from txsni.tlsendpoint import TLSEndpoint
 from txsni.only_noticed_pypi_pem_after_i_wrote_this import objectsFromPEM
 from txsni.parser import SNIDirectoryParser
 
 from OpenSSL.crypto import load_certificate, FILETYPE_PEM
+from OpenSSL.SSL import Context, SSLv23_METHOD, Connection
 
 from twisted.internet import protocol, endpoints, reactor, defer, interfaces
 from twisted.internet.ssl import (
@@ -47,7 +50,13 @@ def sni_endpoint():
     return wrapper_endpoint
 
 
-def handshake(client_factory, server_factory, hostname, server_endpoint):
+def handshake(
+        client_factory,
+        server_factory,
+        hostname,
+        server_endpoint,
+        acceptable_protocols=None,
+):
     """
     Connect a basic Twisted TLS client endpoint to the provided TxSNI
     TLSEndpoint. Returns a Deferred that fires when the connection has been
@@ -56,12 +65,18 @@ def handshake(client_factory, server_factory, hostname, server_endpoint):
     """
     def connect_client(listening_port):
         port_number = listening_port.getHost().port
-
         client = endpoints.TCP4ClientEndpoint(
             reactor, '127.0.0.1', port_number
         )
+
+        maybe_alpn = {}
+        if acceptable_protocols is not None:
+            maybe_alpn['acceptableProtocols'] = acceptable_protocols
+
         options = optionsForClientTLS(
-            hostname=hostname, trustRoot=PEM_ROOT
+            hostname=hostname,
+            trustRoot=PEM_ROOT,
+            **maybe_alpn
         )
         client = endpoints.wrapClientTLS(options, client)
         connectDeferred = client.connect(client_factory)
@@ -88,11 +103,8 @@ class WritingProtocol(protocol.Protocol):
 
     def dataReceived(self, data):
         cert = self.transport.getPeerCertificate()
+        proto = self.transport.negotiatedProtocol
 
-        if not skipNegotiation:
-            proto = self.transport.negotiatedProtocol
-        else:
-            proto = None
         self.transport.abortConnection()
         self.handshake_deferred.callback((cert, proto))
         self.handshake_deferred = None
@@ -120,23 +132,18 @@ class WriteBackProtocol(protocol.Protocol):
         self.transport.loseConnection()
 
 
-try:
-    @implementer(interfaces.IProtocolNegotiationFactory)
-    class NegotiatingFactory(protocol.Factory):
-        """
-        A Twisted Protocol Factory that implements the protocol negotiation
-        extensions
-        """
-        def acceptableProtocols(self):
-            return [b'h2', b'http/1.1']
+@implementer(interfaces.IProtocolNegotiationFactory)
+class NegotiatingFactory(protocol.Factory):
+    """
+    A Twisted Protocol Factory that implements the protocol negotiation
+    extensions
+    """
+    def acceptableProtocols(self):
+        return [b'h2', b'http/1.1']
 
-    class WritingNegotiatingFactory(WritingProtocolFactory,
-                                    NegotiatingFactory):
-        pass
-
-    skipNegotiation = False
-except AttributeError:
-    skipNegotiation = "IProtocolNegotiationFactory not supported"
+class WritingNegotiatingFactory(WritingProtocolFactory,
+                                NegotiatingFactory):
+    pass
 
 
 class TestSNIMap(unittest.TestCase):
@@ -235,16 +242,27 @@ class TestPemObjects(unittest.TestCase, object):
         self.assertEqual(objects.keys, [])
 
 
+
+def will_use_tls_1_3():
+    """
+    Will OpenSSL negotiate TLS 1.3?
+    """
+    ctx = Context(SSLv23_METHOD)
+    connection = Connection(ctx, None)
+    return connection.get_protocol_version_name() == u'TLSv1.3'
+
+
 class TestNegotiationStillWorks(unittest.TestCase):
     """
     Tests that TxSNI doesn't break protocol negotiation.
     """
-    if skipNegotiation:
-        skip = skipNegotiation
 
-    def test_specific_cert_still_negotiates(self):
+    EXPECTED_PROTOCOL = b'h2'
+
+    def assert_specific_cert_still_negotiates(self, perform_handshake):
         """
-        When TxSNI selects a specific cert, protocol negotiation still works.
+        When TxSNI selects a specific cert, protocol negotiation still
+        works.
         """
         handshake_deferred = defer.Deferred()
         client_factory = WritingNegotiatingFactory(handshake_deferred)
@@ -253,7 +271,7 @@ class TestNegotiationStillWorks(unittest.TestCase):
         )
 
         endpoint = sni_endpoint()
-        d = handshake(
+        d = perform_handshake(
             client_factory=client_factory,
             server_factory=server_factory,
             hostname=u'http2bin.org',
@@ -262,7 +280,7 @@ class TestNegotiationStillWorks(unittest.TestCase):
 
         def confirm_cert(args):
             cert, proto = args
-            self.assertEqual(proto, b'h2')
+            self.assertEqual(proto, self.EXPECTED_PROTOCOL)
             return d
 
         def close(args):
@@ -272,6 +290,29 @@ class TestNegotiationStillWorks(unittest.TestCase):
         handshake_deferred.addCallback(confirm_cert)
         handshake_deferred.addCallback(close)
         return handshake_deferred
+
+
+    def test_specific_cert_still_negotiates_with_alpn(self):
+        """
+        When TxSNI selects a specific cert, Application Level Protocol
+        Negotiation (ALPN) still works.
+        """
+        return self.assert_specific_cert_still_negotiates(
+            partial(handshake, acceptable_protocols=[self.EXPECTED_PROTOCOL])
+        )
+
+
+    def test_specific_cert_still_negotiates_with_npn(self):
+        """
+        When TxSNI selects a specific cert, Next Protocol Negotiation
+        (NPN) still works.
+        """
+        return self.assert_specific_cert_still_negotiates(handshake)
+
+    if will_use_tls_1_3():
+        test_specific_cert_still_negotiates_with_npn.skip = (
+            "OpenSSL does not support NPN with TLS 1.3"
+        )
 
 
 class TestSNIDirectoryParser(unittest.TestCase):
