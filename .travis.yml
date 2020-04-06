@@ -11,6 +11,8 @@ matrix:
       python: 2.7
     - env: TOXENV=py36-twlatest
       python: 3.6
+    - env: TOXENV=py36-twtrunk
+      python: 3.6
     - env: TOXENV=pypy3-twlatest
       python: "pypy3"
     - env: TOXENV=pypy3-twtrunk
