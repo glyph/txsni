@@ -9,26 +9,12 @@ matrix:
   include:
     - env: TOXENV=py27-twlatest
       python: 2.7
-    - env: TOXENV=py27-twlatest
-      python: 2.7
     - env: TOXENV=py36-twlatest
       python: 3.6
-    - env: TOXENV=py27-twtrunk
-      python: 2.7
-    - env: TOXENV=py27-twtrunk
-      python: 2.7
-    - env: TOXENV=pypy-twtrunk
-      python: "pypy"
-      dist: trusty
-    - env: TOXENV=pypy-twlatest
-      python: "pypy"
-      dist: trusty
-    - env: TOXENV=pypy-twlatest
-      python: "pypy"
-      dist: trusty
-    - env: TOXENV=pypy-twtrunk
-      python: "pypy"
-      dist: trusty
+    - env: TOXENV=pypy3-twlatest
+      python: "pypy3"
+    - env: TOXENV=pypy3-twtrunk
+      python: "pypy3"
 
 script:
   - pip install tox codecov
