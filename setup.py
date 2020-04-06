@@ -21,7 +21,7 @@ setup(
         "Twisted[tls]>=14.0",
         "pyOpenSSL>=0.14",
     ],
-    version="0.1.9",
+    version="0.2.0",
     long_description=long_description,
     license="MIT",
     url="https://github.com/glyph/txsni",
